@@ -286,7 +286,7 @@ class SearchPage(QWidget):
         # Add the "Food Finder" label to the top left.
         top_bar.addSpacing(5)
         foodFinderLabel = QLabel("Food Finder")
-        foodFinderLabel.setFont(QFont("Segoe UI", 20, QFont.Bold))  # Adjust the font size/style as desired.
+        foodFinderLabel.setFont(QFont("Segoe UI", 20, QFont.Bold))  
         top_bar.addWidget(foodFinderLabel)
 
         top_bar.addSpacing(20)
