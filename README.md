@@ -1,6 +1,6 @@
 # Food Finder
 
-Food Finder is a standalone Python application that allows users to search for nearby restaurants by entering a location (such as a zip code or city name) or by using IP-based geolocation for a "Find Restaurants Near Me" feature. The application displays restaurant details, including images, address, contact information, ratings, and reviews—all within a modern, responsive GUI built with PySide6.
+Food Finder is a standalone Python application that allows users to search for nearby restaurants by entering a location (such as a zip code or city name) or by using IP-based geolocation for a "Find Restaurants Near Me" feature. The application displays restaurant details, including images, address, contact information, ratings, and reviews, all within a GUI built with PySide6.
 
 ## Features
 
