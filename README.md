@@ -75,3 +75,19 @@ GeoGrub is a standalone Python application that allows users to search for nearb
     python foodfinder.py
 
     Alternatively you can download the .exe file which is directly compiled from this code. 
+
+## Features to be implemented:
+
+1. Updated GUI
+
+2. AI Summary of the Restaurant
+
+3. Search Filters
+    - Filter by cuisine type (e.g., Italian, Chinese, Vegan)
+    - Filter by price level or open now
+
+4. Favorites / Save List
+    - Allow users to “star” or save restaurants to a list
+
+5. Persistent History
+    - Save search history so users can revisit previous queries
