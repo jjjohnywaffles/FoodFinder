@@ -1,6 +1,6 @@
-# Food Finder
+# GeoGrub
 
-Food Finder is a standalone Python application that allows users to search for nearby restaurants by entering a location (such as a zip code or city name) or by using IP-based geolocation for a "Find Restaurants Near Me" feature. The application displays restaurant details, including images, address, contact information, ratings, and reviews—all within a modern, responsive GUI built with PySide6.
+GeoGrub is a standalone Python application that allows users to search for nearby restaurants by entering a location (such as a zip code or city name) or by using IP-based geolocation for a "Find Restaurants Near Me" feature. The application displays restaurant details, including images, address, contact information, ratings, and reviews—all within a modern, responsive GUI built with PySide6.
 
 ## Features
 
@@ -34,7 +34,7 @@ Food Finder is a standalone Python application that allows users to search for n
 ## How It Works
 
 1. **Data Source:**  
-   Food Finder leverages the Google Places API to retrieve restaurant data based on the user's input (zip code, city name, or geolocation coordinates).
+   GeoGrub leverages the Google Places API to retrieve restaurant data based on the user's input (zip code, city name, or geolocation coordinates).
 
 2. **Geolocation:**  
    The "Find Restaurants Near Me" feature uses the `geocoder` library to determine the user's approximate location from their IP address.
