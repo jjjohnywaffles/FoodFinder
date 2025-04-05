@@ -19,7 +19,7 @@ from PySide6.QtCore import Qt, QThread, Signal, QTimer, QPropertyAnimation
 from PySide6.QtGui import QPixmap, QIcon, QFont
 
 # Replace with your actual Google Places API Key.
-GOOGLE_PLACES_API_KEY = "REPLACE WITH YOUR GOOGLE API KEY"
+GOOGLE_PLACES_API_KEY = "REPLACE WITH GOOGLE API KEY"
 
 # -----------------------------
 # Global Caches for Optimization
@@ -74,7 +74,7 @@ QTabBar::tab:selected { background-color: #7289DA; }
 """
 
 # -----------------------------
-# RestaurantSearchWorker with initial search optimization
+# RestaurantSearchWorker (Optimized for initial search)
 # -----------------------------
 class RestaurantSearchWorker(QThread):
     results_ready = Signal(list)
@@ -83,9 +83,9 @@ class RestaurantSearchWorker(QThread):
     def __init__(self, location_query, parent=None):
         super().__init__(parent)
         self.location_query = location_query
-        self.radius = 5000  # Fixed radius: 5 km.
+        self.radius = 5000  # 5 km
         self.center = None
-        self.max_pages = 1  # Only fetch the first page for faster initial searches
+        self.max_pages = 1  # Fetch only the first page
 
     def run(self):
         try:
@@ -145,7 +145,7 @@ class RestaurantSearchWorker(QThread):
             self.error_occurred.emit(str(e))
 
 # -----------------------------
-# WelcomePage Class (Landing Page)
+# WelcomePage (Landing Page)
 # -----------------------------
 class WelcomePage(QWidget):
     searchInitiated = Signal(str)
@@ -282,7 +282,7 @@ class WelcomePage(QWidget):
         self.findNearMeButton.setText("Find Restaurants Near Me")
 
 # -----------------------------
-# UpdatedSearchPage Class (Main App with Favorites & Persistence)
+# UpdatedSearchPage (Main App with Favorites, Persistence & Dark Mode for Details)
 # -----------------------------
 class UpdatedSearchPage(QWidget):
     searchInitiated = Signal(str)
@@ -368,8 +368,9 @@ class UpdatedSearchPage(QWidget):
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(left_tab_widget)
 
-        # Details Panel in a Scroll Area.
+        # Details Panel in Scroll Area.
         details_widget = QWidget()
+        self.details_widget = details_widget  # Save for dark mode updates
         details_layout = QVBoxLayout(details_widget)
         details_layout.setAlignment(Qt.AlignTop)
         name_container = QWidget()
@@ -409,7 +410,7 @@ class UpdatedSearchPage(QWidget):
         self.details_address_label.setOpenExternalLinks(True)
         self.details_address_label.setFont(QFont("Segoe UI", 12))
         details_layout.addWidget(self.details_address_label)
-        # Info Bubbles and Favorites Button styled like the others.
+        # Info Bubbles and Favorites Button (styled like bubbles)
         bubbleLayout = QHBoxLayout()
         self.phoneBubble = QLabel()
         self.ratingBubble = QLabel()
@@ -420,11 +421,9 @@ class UpdatedSearchPage(QWidget):
         bubbleLayout.addWidget(self.ratingBubble)
         bubbleLayout.addWidget(self.websiteBubble)
         bubbleLayout.addWidget(self.priceBubble)
-        # Favorites button styled like a bubble.
-        self.fav_button = QPushButton("★")
-        self.fav_button.setFixedSize(40, 30)
-        # Apply the same style as the bubbles.
-        self.fav_button.setStyleSheet(self.phoneBubble.styleSheet())
+        self.fav_button = QPushButton("Add to Favorites")
+        self.fav_button.setFixedSize(120, 30)
+        self.updateFavoriteButton(favorited=False)
         self.fav_button.clicked.connect(self.addToFavorites)
         bubbleLayout.addWidget(self.fav_button)
         bubbleLayout.setAlignment(Qt.AlignCenter)
@@ -484,6 +483,14 @@ class UpdatedSearchPage(QWidget):
             widget.setStyleSheet(style)
             widget.setAlignment(Qt.AlignCenter)
 
+    def updateFavoriteButton(self, favorited):
+        if favorited:
+            self.fav_button.setText("Favorited")
+            self.fav_button.setStyleSheet("background-color: green; color: white; border-radius: 10px;")
+        else:
+            self.fav_button.setText("Add to Favorites")
+            self.fav_button.setStyleSheet("")
+
     def loadFavorites(self):
         try:
             with open("favorites.json", "r") as f:
@@ -524,7 +531,8 @@ class UpdatedSearchPage(QWidget):
                     continue
             if selected_cuisine != "All":
                 types = rest.get("types", [])
-                if not any(selected_cuisine.lower() in t.lower() for t in types):
+                # Check for exact match ignoring case.
+                if selected_cuisine.lower() not in [t.lower() for t in types]:
                     continue
             filtered.append(rest)
 
@@ -577,7 +585,7 @@ class UpdatedSearchPage(QWidget):
         url = "https://maps.googleapis.com/maps/api/place/details/json"
         params = {
             "place_id": place_id,
-            "fields": "name,formatted_address,formatted_phone_number,website,rating,price_level,reviews,photos",
+            "fields": "place_id,name,formatted_address,formatted_phone_number,website,rating,price_level,reviews,photos",
             "key": GOOGLE_PLACES_API_KEY
         }
         response = requests.get(url, params=params)
@@ -613,6 +621,10 @@ class UpdatedSearchPage(QWidget):
             price_text = "N/A"
         self.priceBubble.setText(f"💲 {price_text}")
 
+        # Update favorite button state based on whether the restaurant is already favorited.
+        is_favorited = any(r.get("place_id") == details.get("place_id") for r in self.favorites)
+        self.updateFavoriteButton(favorited=is_favorited)
+
         if "photos" in details and details["photos"]:
             photos = details["photos"]
             self.photoReferences = [photo.get("photo_reference") for photo in photos[:5]]
@@ -640,7 +652,6 @@ class UpdatedSearchPage(QWidget):
         else:
             reviews_html = "<p><i>No reviews available.</i></p>"
         self.details_reviews_text.setHtml(reviews_html)
-
         self.ai_summary_text.setText("AI Summary not available yet. Feature coming soon!")
 
     def updateImage(self):
@@ -666,18 +677,28 @@ class UpdatedSearchPage(QWidget):
     def addToFavorites(self):
         if hasattr(self, 'current_details'):
             current_restaurant = self.current_details
-            # Check for duplicates using place_id.
-            if not any(r.get("place_id") == current_restaurant.get("place_id") for r in self.favorites):
+            # Check if already favorited
+            existing = next((r for r in self.favorites if r.get("place_id") == current_restaurant.get("place_id")), None)
+            if existing:
+                # Remove from favorites
+                self.favorites = [r for r in self.favorites if r.get("place_id") != current_restaurant.get("place_id")]
+                # Update the favorites list UI
+                for i in range(self.favorites_list.count()):
+                    item = self.favorites_list.item(i)
+                    if item.data(Qt.UserRole).get("place_id") == current_restaurant.get("place_id"):
+                        self.favorites_list.takeItem(i)
+                        break
+                self.updateFavoriteButton(favorited=False)
+                QMessageBox.information(self, "Removed", f"{current_restaurant.get('name', 'Unnamed')} removed from favorites.")
+            else:
+                # Add to favorites
                 self.favorites.append(current_restaurant)
                 item = QListWidgetItem(current_restaurant.get("name", "Unnamed"))
                 item.setData(Qt.UserRole, current_restaurant)
                 self.favorites_list.addItem(item)
-                self.saveFavorites()
-                QMessageBox.information(self, "Favorite Added",
-                                        f"{current_restaurant.get('name', 'Unnamed')} added to favorites.")
-            else:
-                QMessageBox.information(self, "Already Favorited",
-                                        "This restaurant is already in your favorites.")
+                self.updateFavoriteButton(favorited=True)
+                QMessageBox.information(self, "Favorite Added", f"{current_restaurant.get('name', 'Unnamed')} added to favorites.")
+            self.saveFavorites()
 
     def get_photo_pixmap(self, photo_reference, max_width=200):
         key = (photo_reference, max_width)
@@ -730,6 +751,12 @@ class RestaurantFinderWindow(QMainWindow):
         self.dark_mode = enabled
         self.search_page.setBubbleStyles(self.dark_mode)
         self.applyStyle()
+        # Update details widget background explicitly.
+        if hasattr(self.search_page, "details_widget"):
+            if self.dark_mode:
+                self.search_page.details_widget.setStyleSheet("background-color: #23272A;")
+            else:
+                self.search_page.details_widget.setStyleSheet("background-color: #F0F2F5;")
 
     def applyStyle(self):
         if self.dark_mode:
